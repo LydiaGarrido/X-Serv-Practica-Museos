@@ -8,6 +8,32 @@ from django.template import Context
 from bs4 import BeautifulSoup
 import urllib
 
+FORM_TITULO = '''
+    <form method = 'POST'>
+    <b><br>Titulo de la página:
+    </b><br>
+    <input type='text' name='Title'><br>
+    <input type='submit' value='Enviar'></form>
+'''
+
+FORM_LETRA = '''
+    <form method = 'POST'>
+    <b><br>Tamaño de letra:
+    </b><br>
+    <input type='text' name='Letra'><br>
+    <input type='submit' value='Enviar'></form>
+'''
+
+FORM_COLOR = '''
+    <form method = 'POST'>
+    <b><br>Color de fondo:
+    </b><br>
+    <input type='text' name='Color'><br>
+    <input type='submit' value='Enviar'></form>
+'''
+
+
+
 # Create your views here.
 @csrf_exempt
 def pag_principal(request):
@@ -197,18 +223,48 @@ def pag_user(request, resource):
     if request.method == 'GET':
         try:
             usuario = User.objects.get(username=resource)
-            saludo = "Esta es la pagina del usuario"
-            c = Context({'saludo': saludo})
-            respuesta = plantilla.render(c)
-            return HttpResponse(respuesta)
+            pag_user = Configuracion.objects.get(usuario=usuario)
         except User.DoesNotExist:
             plantilla = get_template("Kinda_Cloudy/error.html")
-            c = Context({'error': "El usuario no existe"})
+            error = "El usuario no existe"
+            c = Context({'error': error})
             respuesta = plantilla.render(c)
             return HttpResponse(respuesta)
+        except Configuracion.DoesNotExist:
+            pag_user = Configuracion(usuario=usuario)
+            pag_user.titulo = "Pagina de " + resource
+            pag_user.save()
+            return HttpResponseRedirect('/' + resource)
+    elif request.method == 'POST':
+        value = request.body.decode('utf-8').split("=")[0]
+        usuario = User.objects.get(username=resource)
         pag_user = Configuracion.objects.get(usuario=usuario)
+        if value == 'Title':
+            title = request.body.decode('utf-8').split("=")[1].replace("+", " ")
+            if title == "": #Si se envia el formulario vacío
+                pag_user.titulo = "Pagina de " + resource
+            else:
+                pag_user.titulo = title
+            pag_user.save()
+        elif value == 'Letra':
+            letra = request.body.decode('utf-8').split("=")[1]
+            pag_user.letra_size = letra
+            pag_user.save()
+            print(pag_user.letra_size)
+        elif value == 'Color':
+            color_fondo = request.body.decode('utf-8').split("=")[1]
+            pag_user.color_fondo = color_fondo
+            pag_user.save()
     else:
         return HttpResponse("Hola")
+    c = Context({'usuario':resource,
+            'titulo': pag_user.titulo,
+            'form_titulo': FORM_TITULO,
+            'form_letra': FORM_LETRA,
+            'form_color': FORM_COLOR})
+    respuesta = plantilla.render(c)
+    return HttpResponse(respuesta)
+
 
 def about(request):
     plantilla = get_template("Kinda_Cloudy/about.html")
