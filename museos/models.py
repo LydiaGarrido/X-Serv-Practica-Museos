@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 
 class Museo(models.Model):
     id_entidad = models.CharField(max_length=150, default="Null")
-    nombre = models.CharField(max_length=150, default="Null")
+    nombre = models.TextField(default="Null")
     descripcion_entidad = models.TextField(default="Null")
     horario = models.TextField(default="Null")
     equipamiento = models.TextField(default="Null")
@@ -45,5 +45,5 @@ class Configuracion(models.Model):
 
 class Seleccion(models.Model):
     museo = models.ForeignKey(Museo)
-    usario = models.ForeignKey(User)
+    usuario = models.ForeignKey(User)
     fecha = models.DateField()

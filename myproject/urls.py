@@ -10,4 +10,7 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', views.pag_principal, name='Inicio'),
     url(r'^museos$', views.pag_museos, name='Todos los museos'),
+    url(r'^about$', views.about, name="About"),
+    url(r'^museos/(\d+)$', views.pag_museo, name='Pagina de cada museo'),
+    url(r'^(.+)', views.pag_user, name="Pagina personal del usuario"),
 ]

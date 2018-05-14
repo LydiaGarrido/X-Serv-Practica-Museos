@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
-from museos.models import Museo
+from museos.models import Museo, Configuracion
+from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import get_template
 from django.template import Context
@@ -97,3 +98,120 @@ def pag_principal(request):
     else:
         respuesta = "Hola"
         return HttpResponse(respuesta)
+
+@csrf_exempt
+def pag_museos(request):
+    plantilla = get_template("Kinda_Cloudy/pag_museos.html")
+    todos_museos = Museo.objects.all()
+    lista_distritos = todos_museos.order_by().values_list('distrito', flat=True).distinct()
+    menu_desplegable = "<form method='POST'>"
+    menu_desplegable += "Filtrar por distrito:<br/>"
+    menu_desplegable += "<select name='Distrito'>"
+    menu_desplegable += "<option value='TODOS'>TODOS</option>"
+    for distrito in lista_distritos:
+        menu_desplegable += "<option value='" + distrito + "'>"
+        menu_desplegable += distrito + "</option>"
+    menu_desplegable += "</select>"
+    menu_desplegable += "<input type='submit' value='Enviar'>"
+    menu_desplegable += "</form>"
+    if request.method == "GET":
+        museos = "<ul>"
+        for museo in todos_museos:
+            museos += "<li>"
+            museos += "<b><a href='/museos/" + museo.id_entidad + "'>" + museo.nombre
+            museos += "</a></b>"
+            museos += "</li>"
+        museos += "</ul>"
+        funcionamiento = "Pulse sobre el nombre del museo"
+        funcionamiento += " para ir a su página"
+        c = Context({'menu': menu_desplegable, 'funcionamiento': funcionamiento, 'museos': museos})
+        respuesta = plantilla.render(c)
+        return HttpResponse(respuesta)
+    elif request.method == "POST":
+        distrito = request.body.decode('utf-8').split("=")[1].replace("+"," ")
+        if distrito == "TODOS":
+            museos = "<ul>"
+            for museo in todos_museos:
+                museos += "<li>"
+                museos += "<b><a href="">" + museo.nombre
+                museos += "</a></b>"
+                museos += "</li>"
+            museos += "</ul>"
+            funcionamiento = "Pulse sobre el nombre del museo"
+            funcionamiento += " para ir a su página"
+            c = Context({'menu': menu_desplegable, 'funcionamiento': funcionamiento, 'museos': museos})
+            respuesta = plantilla.render(c)
+            return HttpResponse(respuesta)
+        else:
+            museos_filtrados = Museo.objects.all().filter(distrito=distrito)
+            museos = "<ul>"
+            for museo in museos_filtrados:
+                museos += "<li>"
+                museos += "<b><a href="">" + museo.nombre
+                museos += "</a></b>"
+                museos += "</li>"
+            museos += "</ul>"
+            informacion = "Estás viendo los museos de " + distrito
+            funcionamiento = "Pulse sobre el nombre del museo"
+            funcionamiento += " para ir a su página"
+            c = Context({'menu': menu_desplegable, 'funcionamiento': funcionamiento, 'museos': museos, 'informacion': informacion})
+            respuesta = plantilla.render(c)
+            return HttpResponse(respuesta)
+    else:
+        return HttpResponse("Hola")
+
+@csrf_exempt
+def pag_museo(request, resource):
+    plantilla = get_template("Kinda_Cloudy/pag_museo.html")
+    todos_museos = Museo.objects.all()
+    if request.method == "GET":
+        museo = todos_museos.get(id_entidad=resource)
+        datos_museo = "<b><h2>" + museo.nombre + "</h2></b>"
+        datos_museo += "<b>DESCRIPCION:</b><br>"
+        datos_museo += museo.descripcion + "<br>"
+        datos_museo += "<b>ACCESIBILIDAD:</b> "
+        if museo.accesibilidad == 1:
+            datos_museo += "Sí<br>"
+        else:
+            datos_museo += "No<br>"
+        datos_museo += "<b>DIRECCION</b>:<br>"
+        datos_museo += museo.clase_vial + " " + museo.nombre_via + " "
+        datos_museo += museo.tipo_num + " " + museo.num + "<br>"
+        datos_museo += museo.localidad + ", " + museo.provincia
+        datos_museo += "<br>" + museo.codigo_postal
+        datos_museo += "<br>" + museo.barrio + " " + museo.distrito
+        datos_museo += "<br>" + museo.coordenada_x + ", "
+        datos_museo += museo.coordenada_y
+        datos_museo += "<br>" + museo.latitud + ", " + museo.longitud
+    elif request.method == "POST":
+        return HttpResponse("Hola")
+    else:
+        return HttpResponse("Hola")
+    c = Context({'datos_museo': datos_museo})
+    respuesta = plantilla.render(c)
+    return HttpResponse(respuesta)
+
+@csrf_exempt
+def pag_user(request, resource):
+    plantilla = get_template("Kinda_Cloudy/pag_usuario.html")
+    if request.method == 'GET':
+        try:
+            usuario = User.objects.get(username=resource)
+            saludo = "Esta es la pagina del usuario"
+            c = Context({'saludo': saludo})
+            respuesta = plantilla.render(c)
+            return HttpResponse(respuesta)
+        except User.DoesNotExist:
+            plantilla = get_template("Kinda_Cloudy/error.html")
+            c = Context({'error': "El usuario no existe"})
+            respuesta = plantilla.render(c)
+            return HttpResponse(respuesta)
+        pag_user = Configuracion.objects.get(usuario=usuario)
+    else:
+        return HttpResponse("Hola")
+
+def about(request):
+    plantilla = get_template("Kinda_Cloudy/about.html")
+    c = Context();
+    respuesta = plantilla.render(c)
+    return HttpResponse(respuesta)
