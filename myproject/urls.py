@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from museos import views
+from django.contrib.auth.views import login, logout
 
 urlpatterns = [
     # Examples:
@@ -12,5 +13,7 @@ urlpatterns = [
     url(r'^museos$', views.pag_museos, name='Todos los museos'),
     url(r'^about$', views.about, name="About"),
     url(r'^museos/(\d+)$', views.pag_museo, name='Pagina de cada museo'),
+    url(r'^logout$', views.logoutUser),
+    url(r'^login$', views.loginUser),
     url(r'^(.+)', views.pag_user, name="Pagina personal del usuario"),
 ]

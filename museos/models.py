@@ -32,6 +32,7 @@ class Museo(models.Model):
     telefono = models.CharField(max_length=150, default="Null")
     fax = models.CharField(max_length=100, default="Null")
     email = models.CharField(max_length=100, default="Null")
+    num_coment = models.IntegerField(default=0)
 
 class Comentarios(models.Model):
     comentario = models.TextField(default="Null")

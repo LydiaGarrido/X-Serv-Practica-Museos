@@ -1,12 +1,14 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
-from museos.models import Museo, Configuracion
+from museos.models import Museo, Configuracion, Comentarios, Seleccion
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import get_template
-from django.template import Context
+from django.template import RequestContext
 from bs4 import BeautifulSoup
 import urllib
+import datetime
+from django.contrib.auth import authenticate, login, logout
 
 FORM_TITULO = '''
     <form method = 'POST'>
@@ -32,7 +34,13 @@ FORM_COLOR = '''
     <input type='submit' value='Enviar'></form>
 '''
 
-
+FORM_COMENTARIO = '''
+    <form method='POST'><h3><b>Introduce un comentario:
+    </b></h3>
+	<input type='text' name='Comentario'>
+    <input type='submit' value='Enviar'>
+    </form>
+'''
 
 # Create your views here.
 @csrf_exempt
@@ -118,12 +126,41 @@ def pag_principal(request):
                     nuevo_museo.save()
             return HttpResponseRedirect('/')
         saludo = "Presione el botón si desea cargar los datos:"
-        c = Context({'boton': form_boton, 'saludo': saludo})
+        c = RequestContext(request, {'boton': form_boton, 'saludo': saludo})
         respuesta = plantilla.render(c)
         return HttpResponse(respuesta)
     else:
-        respuesta = "Hola"
-        return HttpResponse(respuesta)
+        if request.method == 'GET':
+            listaMasComentados = Museo.objects.all().order_by('-num_coment')
+            listaMasComentados = listaMasComentados.exclude(num_coment=0)
+            listaMasComentados = listaMasComentados[:5]
+            datos = "<ul>"
+            for museo in listaMasComentados:
+                datos += "<li>"
+                datos += "<b><a href='" + museo.content_url + "'>" + museo.nombre
+                datos += "</a>"
+                datos += "<br><b>DIRECCION</b>:<br>"
+                datos += museo.clase_vial + " " + museo.nombre_via + " "
+                datos += museo.tipo_num + " " + museo.num + "<br>"
+                datos += museo.localidad + ", " + museo.provincia
+                datos += "<br>" + museo.codigo_postal
+                datos += "<br>" + museo.barrio + " " + museo.distrito
+                datos += "<br>" + museo.coordenada_x + ", "
+                datos += museo.coordenada_y
+                datos += "<br>" + museo.latitud + ", " + museo.longitud + "<br>"
+                datos += "<b><a href='/museos/" + museo.id_entidad + "'>Más información"
+                datos += "</a></li>"
+            datos += "</ul>"
+            c = RequestContext(request, {'datos':datos})
+            respuesta = plantilla.render(c)
+            return HttpResponse(respuesta)
+        else:
+            plantilla = get_template("Kinda_Cloudy/error.html")
+            error = "Method not allowed"
+            c = RequestContext(request, {'error': error})
+            respuesta = plantilla.render(c)
+            return HttpResponse(respuesta)
+
 
 @csrf_exempt
 def pag_museos(request):
@@ -150,7 +187,7 @@ def pag_museos(request):
         museos += "</ul>"
         funcionamiento = "Pulse sobre el nombre del museo"
         funcionamiento += " para ir a su página"
-        c = Context({'menu': menu_desplegable, 'funcionamiento': funcionamiento, 'museos': museos})
+        c = RequestContext(request, {'menu': menu_desplegable, 'funcionamiento': funcionamiento, 'museos': museos})
         respuesta = plantilla.render(c)
         return HttpResponse(respuesta)
     elif request.method == "POST":
@@ -165,7 +202,7 @@ def pag_museos(request):
             museos += "</ul>"
             funcionamiento = "Pulse sobre el nombre del museo"
             funcionamiento += " para ir a su página"
-            c = Context({'menu': menu_desplegable, 'funcionamiento': funcionamiento, 'museos': museos})
+            c = RequestContext(request, {'menu': menu_desplegable, 'funcionamiento': funcionamiento, 'museos': museos})
             respuesta = plantilla.render(c)
             return HttpResponse(respuesta)
         else:
@@ -180,7 +217,7 @@ def pag_museos(request):
             informacion = "Estás viendo los museos de " + distrito
             funcionamiento = "Pulse sobre el nombre del museo"
             funcionamiento += " para ir a su página"
-            c = Context({'menu': menu_desplegable, 'funcionamiento': funcionamiento, 'museos': museos, 'informacion': informacion})
+            c = RequestContext(request, {'menu': menu_desplegable, 'funcionamiento': funcionamiento, 'museos': museos, 'informacion': informacion})
             respuesta = plantilla.render(c)
             return HttpResponse(respuesta)
     else:
@@ -190,30 +227,56 @@ def pag_museos(request):
 def pag_museo(request, resource):
     plantilla = get_template("Kinda_Cloudy/pag_museo.html")
     todos_museos = Museo.objects.all()
-    if request.method == "GET":
-        museo = todos_museos.get(id_entidad=resource)
-        datos_museo = "<b><h2>" + museo.nombre + "</h2></b>"
-        datos_museo += "<b>DESCRIPCION:</b><br>"
-        datos_museo += museo.descripcion + "<br>"
-        datos_museo += "<b>ACCESIBILIDAD:</b> "
-        if museo.accesibilidad == 1:
-            datos_museo += "Sí<br>"
-        else:
-            datos_museo += "No<br>"
-        datos_museo += "<b>DIRECCION</b>:<br>"
-        datos_museo += museo.clase_vial + " " + museo.nombre_via + " "
-        datos_museo += museo.tipo_num + " " + museo.num + "<br>"
-        datos_museo += museo.localidad + ", " + museo.provincia
-        datos_museo += "<br>" + museo.codigo_postal
-        datos_museo += "<br>" + museo.barrio + " " + museo.distrito
-        datos_museo += "<br>" + museo.coordenada_x + ", "
-        datos_museo += museo.coordenada_y
-        datos_museo += "<br>" + museo.latitud + ", " + museo.longitud
-    elif request.method == "POST":
-        return HttpResponse("Hola")
+    museo = todos_museos.get(id_entidad=resource)
+    datos_museo = "<b><h2>" + museo.nombre + "</h2></b>"
+    datos_museo += "<b>DESCRIPCION:</b><br>"
+    datos_museo += museo.descripcion + "<br>"
+    datos_museo += "<b>ACCESIBILIDAD:</b> "
+    if museo.accesibilidad == 1:
+        datos_museo += "Sí<br>"
     else:
-        return HttpResponse("Hola")
-    c = Context({'datos_museo': datos_museo})
+        datos_museo += "No<br>"
+    datos_museo += "<b>DIRECCION</b>:<br>"
+    datos_museo += museo.clase_vial + " " + museo.nombre_via + " "
+    datos_museo += museo.tipo_num + " " + museo.num + "<br>"
+    datos_museo += museo.localidad + ", " + museo.provincia
+    datos_museo += "<br>" + museo.codigo_postal
+    datos_museo += "<br>" + museo.barrio + " " + museo.distrito
+    datos_museo += "<br>" + museo.coordenada_x + ", "
+    datos_museo += museo.coordenada_y
+    datos_museo += "<br>" + museo.latitud + ", " + museo.longitud
+    boton_add = "<form method = 'POST'><button type='submit' "
+    boton_add += "name='Add' value=1>Add"
+    boton_add += "</button>"
+    if request.method == "GET":
+        comentarios = Comentarios.objects.all().filter(museo=museo)
+    elif request.method == "POST":
+        value = request.body.decode('utf-8').split("=")[0]
+        if value == "Add":
+            museo = Museo.objects.get(id_entidad=resource)
+            usuario = User.objects.get(username=request.user)
+            fecha = datetime.date.today()
+            museo_seleccionado = Seleccion(museo=museo, usuario=usuario, fecha=fecha)
+            museo_seleccionado.save()
+            comentarios = Comentarios.objects.all().filter(museo=museo)
+        elif value == "Comentario":
+            museo = Museo.objects.get(id_entidad=resource)
+            comentario = request.body.decode('utf-8').split("=")[1].replace("+", " ")
+            nuevo_comentario = Comentarios(comentario=comentario, museo=museo)
+            nuevo_comentario.save()
+            museo.num_coment = museo.num_coment + 1
+            museo.save()
+            comentarios = Comentarios.objects.all().filter(museo=museo)
+    else:
+        plantilla = get_template("Kinda_Cloudy/error.html")
+        error = "Method not allowed"
+        c = RequestContext(request, {'error': error})
+        respuesta = plantilla.render(c)
+        return HttpResponse(respuesta)
+    c = RequestContext(request, {'datos_museo': datos_museo,
+                                'boton': boton_add,
+                                'form_coment':FORM_COMENTARIO,
+                                'comentarios': comentarios})
     respuesta = plantilla.render(c)
     return HttpResponse(respuesta)
 
@@ -227,7 +290,7 @@ def pag_user(request, resource):
         except User.DoesNotExist:
             plantilla = get_template("Kinda_Cloudy/error.html")
             error = "El usuario no existe"
-            c = Context({'error': error})
+            c = RequestContext(request, {'error': error})
             respuesta = plantilla.render(c)
             return HttpResponse(respuesta)
         except Configuracion.DoesNotExist:
@@ -256,8 +319,13 @@ def pag_user(request, resource):
             pag_user.color_fondo = color_fondo
             pag_user.save()
     else:
-        return HttpResponse("Hola")
-    c = Context({'usuario':resource,
+        plantilla = get_template("Kinda_Cloudy/error.html")
+        error = "Method not allowed"
+        c = RequestContext(request, {'error': error})
+        respuesta = plantilla.render(c)
+        return HttpResponse(respuesta)
+    c = RequestContext(request, {'usuarioname':resource,
+            'usuario': usuario,
             'titulo': pag_user.titulo,
             'form_titulo': FORM_TITULO,
             'form_letra': FORM_LETRA,
@@ -268,6 +336,24 @@ def pag_user(request, resource):
 
 def about(request):
     plantilla = get_template("Kinda_Cloudy/about.html")
-    c = Context();
+    c = RequestContext(request,{});
     respuesta = plantilla.render(c)
     return HttpResponse(respuesta)
+
+@csrf_exempt
+def loginUser(request):
+    if request.method == "POST":
+        userName = request.POST['username']
+        pw = request.POST['password']
+        visitante = authenticate(username=userName, password=pw)
+        if visitante is not None:
+            if visitante.is_active:
+                login(request, visitante)
+
+    return HttpResponseRedirect('/')
+
+@csrf_exempt
+def logoutUser(request):
+    if request.method == 'POST':
+        logout(request)
+    return HttpResponseRedirect('/')
