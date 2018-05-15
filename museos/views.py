@@ -10,6 +10,8 @@ import urllib
 import datetime
 from django.contrib.auth import authenticate, login, logout
 
+accesibilidad = False
+
 FORM_TITULO = '''
     <form method = 'POST'>
     <b><br>Titulo de la página:
@@ -45,14 +47,15 @@ FORM_COMENTARIO = '''
 # Create your views here.
 @csrf_exempt
 def pag_principal(request):
+    global accesibilidad
     plantilla = get_template("Kinda_Cloudy/index.html")
     todos_museos = Museo.objects.all()
     num_museos = len(todos_museos)
     if(num_museos==0):
         if request.method == "GET":
-            form_boton = "<form method = 'POST'><button type='submit' "
-            form_boton += "name='Cargar' value=1>Cargar"
-            form_boton += "</button>"
+            name = 'Cargar'
+            value = "Cargar"
+            form_boton = "Cargar"
         elif request.method == "POST":
             url_museos = "https://datos.madrid.es/portal/site/egob/"
             url_museos += "menuitem.ac61933d6ee3c31cae77ae7784f1a5a0/"
@@ -126,46 +129,57 @@ def pag_principal(request):
                     nuevo_museo.save()
             return HttpResponseRedirect('/')
         saludo = "Presione el botón si desea cargar los datos:"
-        c = RequestContext(request, {'boton': form_boton, 'saludo': saludo})
+        c = RequestContext(request, {'form_boton': form_boton,'name': name, 'value':value, 'saludo': saludo})
         respuesta = plantilla.render(c)
         return HttpResponse(respuesta)
     else:
+        value = "Accesibilidad"
+        name = "Accesibilidad"
         if request.method == 'GET':
             listaMasComentados = Museo.objects.all().order_by('-num_coment')
             listaMasComentados = listaMasComentados.exclude(num_coment=0)
+            if accesibilidad:
+                listaMasComentados = listaMasComentados.filter(accesibilidad=1)
+                boton = "Mostrar todos"
+            else:
+                boton = "Mostrar accesibles"
             listaMasComentados = listaMasComentados[:5]
-            datos = "<ul>"
-            for museo in listaMasComentados:
-                datos += "<li>"
-                datos += "<b><a href='" + museo.content_url + "'>" + museo.nombre
-                datos += "</a>"
-                datos += "<br><b>DIRECCION</b>:<br>"
-                datos += museo.clase_vial + " " + museo.nombre_via + " "
-                datos += museo.tipo_num + " " + museo.num + "<br>"
-                datos += museo.localidad + ", " + museo.provincia
-                datos += "<br>" + museo.codigo_postal
-                datos += "<br>" + museo.barrio + " " + museo.distrito
-                datos += "<br>" + museo.coordenada_x + ", "
-                datos += museo.coordenada_y
-                datos += "<br>" + museo.latitud + ", " + museo.longitud + "<br>"
-                datos += "<b><a href='/museos/" + museo.id_entidad + "'>Más información"
-                datos += "</a></li>"
-            datos += "</ul>"
-            c = RequestContext(request, {'datos':datos})
-            respuesta = plantilla.render(c)
-            return HttpResponse(respuesta)
+            c = RequestContext(request, {'listaMasComentados':listaMasComentados,
+                            'form_boton': boton,
+                            'name': name,
+                            'value': value})
+        elif request.method == 'POST':
+            value = request.body.decode('utf-8').split("=")[1]
+            if value == "Accesibilidad":
+                accesibilidad = not accesibilidad
+            listaMasComentados = Museo.objects.all().order_by('-num_coment')
+            listaMasComentados = listaMasComentados.exclude(num_coment=0)
+            if accesibilidad:
+                listaMasComentados = listaMasComentados.filter(accesibilidad=1)
+                boton = "Mostrar todos"
+            else:
+                boton = "Mostrar accesibles"
+            listaMasComentados = listaMasComentados[:5]
+            c = RequestContext(request, {'listaMasComentados':listaMasComentados,
+                                'form_boton': boton,
+                                'name': name,
+                                'value':value})
         else:
             plantilla = get_template("Kinda_Cloudy/error.html")
-            error = "Method not allowed"
+            error = "Método no permitido"
             c = RequestContext(request, {'error': error})
             respuesta = plantilla.render(c)
             return HttpResponse(respuesta)
-
+        respuesta = plantilla.render(c)
+        return HttpResponse(respuesta)
 
 @csrf_exempt
 def pag_museos(request):
+    global accesibilidad
     plantilla = get_template("Kinda_Cloudy/pag_museos.html")
     todos_museos = Museo.objects.all()
+    if accesibilidad:
+        todos_museos = todos_museos.filter(accesibilidad=1)
     lista_distritos = todos_museos.order_by().values_list('distrito', flat=True).distinct()
     menu_desplegable = "<form method='POST'>"
     menu_desplegable += "Filtrar por distrito:<br/>"
@@ -269,7 +283,7 @@ def pag_museo(request, resource):
             comentarios = Comentarios.objects.all().filter(museo=museo)
     else:
         plantilla = get_template("Kinda_Cloudy/error.html")
-        error = "Method not allowed"
+        error = "Método no permitido"
         c = RequestContext(request, {'error': error})
         respuesta = plantilla.render(c)
         return HttpResponse(respuesta)
@@ -283,10 +297,39 @@ def pag_museo(request, resource):
 @csrf_exempt
 def pag_user(request, resource):
     plantilla = get_template("Kinda_Cloudy/pag_usuario.html")
+    boton_mas = "<form method = 'POST'><button type='submit' "
+    boton_mas += "name='Mas' value=1>Más"
+    boton_mas += "</button>"
     if request.method == 'GET':
         try:
             usuario = User.objects.get(username=resource)
             pag_user = Configuracion.objects.get(usuario=usuario)
+            museos_seleccionados = Seleccion.objects.filter(usuario=usuario)
+            museos_seleccionados = museos_seleccionados[:5]
+            datos_selec = "<ul>"
+            for seleccionado in museos_seleccionados:
+                datos_selec += "<li>"
+                datos_selec += "<b><a href='" + seleccionado.museo.content_url
+                datos_selec += "'>" + seleccionado.museo.nombre
+                datos_selec += "</a>"
+                datos_selec += "<br><b>DIRECCION</b>:<br>"
+                datos_selec += seleccionado.museo.clase_vial
+                datos_selec += " " + seleccionado.museo.nombre_via + " "
+                datos_selec += seleccionado.museo.tipo_num + " "
+                datos_selec += seleccionado.museo.num + "<br>"
+                datos_selec += seleccionado.museo.localidad + ", "
+                datos_selec += seleccionado.museo.provincia
+                datos_selec += "<br>" + seleccionado.museo.codigo_postal
+                datos_selec += "<br>" + seleccionado.museo.barrio
+                datos_selec += " " + seleccionado.museo.distrito
+                datos_selec += "<br>" + seleccionado.museo.coordenada_x + ", "
+                datos_selec += seleccionado.museo.coordenada_y
+                datos_selec += "<br>" + seleccionado.museo.latitud
+                datos_selec += ", " + seleccionado.museo.longitud + "<br>"
+                datos_selec += "<b><a href='/museos/" + seleccionado.museo.id_entidad
+                datos_selec += "'>Más información"
+                datos_selec += "</a></li>"
+            datos_selec += "</ul>"
         except User.DoesNotExist:
             plantilla = get_template("Kinda_Cloudy/error.html")
             error = "El usuario no existe"
@@ -320,7 +363,7 @@ def pag_user(request, resource):
             pag_user.save()
     else:
         plantilla = get_template("Kinda_Cloudy/error.html")
-        error = "Method not allowed"
+        error = "Método no permitido"
         c = RequestContext(request, {'error': error})
         respuesta = plantilla.render(c)
         return HttpResponse(respuesta)
@@ -329,7 +372,9 @@ def pag_user(request, resource):
             'titulo': pag_user.titulo,
             'form_titulo': FORM_TITULO,
             'form_letra': FORM_LETRA,
-            'form_color': FORM_COLOR})
+            'form_color': FORM_COLOR,
+            'boton_mas': boton_mas,
+            'seleccionados':datos_selec})
     respuesta = plantilla.render(c)
     return HttpResponse(respuesta)
 
