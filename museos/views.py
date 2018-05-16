@@ -29,11 +29,16 @@ FORM_LETRA = '''
 '''
 
 FORM_COLOR = '''
-    <form method = 'POST'>
-    <b><br>Color de fondo:
-    </b><br>
-    <input type='text' name='Color'><br>
-    <input type='submit' value='Enviar'></form>
+    <form method='POST'>
+    <b>Color de fondo:</b>
+    <select name='Color'>
+    <option value='blue'>Azul</option>
+    <option value='red'>Rojo</option>
+    <option value='white'>Blanco</option>
+    <option value='#D3D3D3'>Default</option>
+    </select>
+    <input type='submit' value='Enviar'>
+    </form>
 '''
 
 FORM_COMENTARIO = '''
@@ -49,7 +54,25 @@ FORM_COMENTARIO = '''
 def pag_principal(request):
     global accesibilidad
     plantilla = get_template("Kinda_Cloudy/index.html")
+    try:
+        usuario = User.objects.get(username=request.user)
+        color_user = Configuracion.objects.get(usuario=usuario).color_fondo
+        if(usuario.is_authenticated and not color_user == "Null"):
+            color_fondo = color_user
+    except (User.DoesNotExist, Configuracion.DoesNotExist):
+        color_fondo = "#D3D3D3"
     todos_museos = Museo.objects.all()
+    lista_usuarios = User.objects.all()
+    pag_personales = ""
+    for usuario in lista_usuarios:
+        try:
+            pag_usuario = Configuracion.objects.get(usuario=usuario)
+            titulo = pag_usuario.titulo
+            pag_personales += "<a href='/" + usuario.username + "'>"
+            pag_personales += titulo + "</a><br>"
+        except Configuracion.DoesNotExist:
+            pag_personales += "<a href='/" + usuario.username + "'>Pagina de "
+            pag_personales += usuario.username + "</a><br>"
     num_museos = len(todos_museos)
     if(num_museos==0):
         if request.method == "GET":
@@ -129,7 +152,12 @@ def pag_principal(request):
                     nuevo_museo.save()
             return HttpResponseRedirect('/')
         saludo = "Presione el botón si desea cargar los datos:"
-        c = RequestContext(request, {'form_boton': form_boton,'name': name, 'value':value, 'saludo': saludo})
+        c = RequestContext(request, {'form_boton': form_boton,
+                        'name': name,
+                        'value':value,
+                        'saludo': saludo,
+                        'paginas_personales': pag_personales,
+                        'color': color_fondo})
         respuesta = plantilla.render(c)
         return HttpResponse(respuesta)
     else:
@@ -147,7 +175,9 @@ def pag_principal(request):
             c = RequestContext(request, {'listaMasComentados':listaMasComentados,
                             'form_boton': boton,
                             'name': name,
-                            'value': value})
+                            'value': value,
+                            'paginas_personales': pag_personales,
+                            'color': color_fondo})
         elif request.method == 'POST':
             value = request.body.decode('utf-8').split("=")[1]
             if value == "Accesibilidad":
@@ -163,7 +193,9 @@ def pag_principal(request):
             c = RequestContext(request, {'listaMasComentados':listaMasComentados,
                                 'form_boton': boton,
                                 'name': name,
-                                'value':value})
+                                'value':value,
+                                'paginas_personales': pag_personales,
+                                'color': color_fondo})
         else:
             plantilla = get_template("Kinda_Cloudy/error.html")
             error = "Método no permitido"
@@ -172,6 +204,7 @@ def pag_principal(request):
             return HttpResponse(respuesta)
         respuesta = plantilla.render(c)
         return HttpResponse(respuesta)
+
 
 @csrf_exempt
 def pag_museos(request):
@@ -306,30 +339,6 @@ def pag_user(request, resource):
             pag_user = Configuracion.objects.get(usuario=usuario)
             museos_seleccionados = Seleccion.objects.filter(usuario=usuario)
             museos_seleccionados = museos_seleccionados[:5]
-            datos_selec = "<ul>"
-            for seleccionado in museos_seleccionados:
-                datos_selec += "<li>"
-                datos_selec += "<b><a href='" + seleccionado.museo.content_url
-                datos_selec += "'>" + seleccionado.museo.nombre
-                datos_selec += "</a>"
-                datos_selec += "<br><b>DIRECCION</b>:<br>"
-                datos_selec += seleccionado.museo.clase_vial
-                datos_selec += " " + seleccionado.museo.nombre_via + " "
-                datos_selec += seleccionado.museo.tipo_num + " "
-                datos_selec += seleccionado.museo.num + "<br>"
-                datos_selec += seleccionado.museo.localidad + ", "
-                datos_selec += seleccionado.museo.provincia
-                datos_selec += "<br>" + seleccionado.museo.codigo_postal
-                datos_selec += "<br>" + seleccionado.museo.barrio
-                datos_selec += " " + seleccionado.museo.distrito
-                datos_selec += "<br>" + seleccionado.museo.coordenada_x + ", "
-                datos_selec += seleccionado.museo.coordenada_y
-                datos_selec += "<br>" + seleccionado.museo.latitud
-                datos_selec += ", " + seleccionado.museo.longitud + "<br>"
-                datos_selec += "<b><a href='/museos/" + seleccionado.museo.id_entidad
-                datos_selec += "'>Más información"
-                datos_selec += "</a></li>"
-            datos_selec += "</ul>"
         except User.DoesNotExist:
             plantilla = get_template("Kinda_Cloudy/error.html")
             error = "El usuario no existe"
@@ -345,6 +354,8 @@ def pag_user(request, resource):
         value = request.body.decode('utf-8').split("=")[0]
         usuario = User.objects.get(username=resource)
         pag_user = Configuracion.objects.get(usuario=usuario)
+        museos_seleccionados = Seleccion.objects.filter(usuario=usuario)
+        museos_seleccionados = museos_seleccionados[:5]
         if value == 'Title':
             title = request.body.decode('utf-8').split("=")[1].replace("+", " ")
             if title == "": #Si se envia el formulario vacío
@@ -374,7 +385,7 @@ def pag_user(request, resource):
             'form_letra': FORM_LETRA,
             'form_color': FORM_COLOR,
             'boton_mas': boton_mas,
-            'seleccionados':datos_selec})
+            'seleccionados':museos_seleccionados})
     respuesta = plantilla.render(c)
     return HttpResponse(respuesta)
 
