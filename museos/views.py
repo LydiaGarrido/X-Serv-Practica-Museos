@@ -12,63 +12,33 @@ from django.contrib.auth import authenticate, login, logout
 
 accesibilidad = False
 
-FORM_TITULO = '''
-    <form method = 'POST'>
-    <b><br>Titulo de la página:
-    </b><br>
-    <input type='text' name='Title'><br>
-    <input type='submit' value='Enviar'></form>
-'''
-
-FORM_LETRA = '''
-    <form method = 'POST'>
-    <b><br>Tamaño de letra:
-    </b><br>
-    <input type='text' name='Letra'><br>
-    <input type='submit' value='Enviar'></form>
-'''
-
-FORM_COLOR = '''
-    <form method='POST'>
-    <b>Color de fondo:</b>
-    <select name='Color'>
-    <option value='blue'>Azul</option>
-    <option value='red'>Rojo</option>
-    <option value='white'>Blanco</option>
-    <option value='#D3D3D3'>Default</option>
-    </select>
-    <input type='submit' value='Enviar'>
-    </form>
-'''
-
-FORM_COMENTARIO = '''
-    <form method='POST'><h3><b>Introduce un comentario:
-    </b></h3>
-	<input type='text' name='Comentario'>
-    <input type='submit' value='Enviar'>
-    </form>
-'''
-
 # Create your views here.
 @csrf_exempt
 def pag_principal(request):
     global accesibilidad
     plantilla = get_template("Kinda_Cloudy/index.html")
+    tamano = "13px"
+    color_fondo = "#D3D3D3"
     try:
         usuario = User.objects.get(username=request.user)
         color_user = Configuracion.objects.get(usuario=usuario).color_fondo
+        letra_user = Configuracion.objects.get(usuario=usuario).letra_size
         if(usuario.is_authenticated and not color_user == "Null"):
             color_fondo = color_user
+            tamano = letra_user
     except (User.DoesNotExist, Configuracion.DoesNotExist):
         color_fondo = "#D3D3D3"
+        tamano = "13px"
     todos_museos = Museo.objects.all()
     lista_usuarios = User.objects.all()
     pag_personales = ""
+    pag_personales = "<ul>"
     for usuario in lista_usuarios:
         try:
             pag_usuario = Configuracion.objects.get(usuario=usuario)
             titulo = pag_usuario.titulo
-            pag_personales += "<a href='/" + usuario.username + "'>"
+            pag_personales += "<li>" + usuario.username
+            pag_personales += " <a href='/" + usuario.username + "'>"
             pag_personales += titulo + "</a><br>"
         except Configuracion.DoesNotExist:
             pag_personales += "<a href='/" + usuario.username + "'>Pagina de "
@@ -157,7 +127,8 @@ def pag_principal(request):
                         'value':value,
                         'saludo': saludo,
                         'paginas_personales': pag_personales,
-                        'color': color_fondo})
+                        'color': color_fondo,
+                        'tamano': tamano})
         respuesta = plantilla.render(c)
         return HttpResponse(respuesta)
     else:
@@ -172,12 +143,6 @@ def pag_principal(request):
             else:
                 boton = "Mostrar accesibles"
             listaMasComentados = listaMasComentados[:5]
-            c = RequestContext(request, {'listaMasComentados':listaMasComentados,
-                            'form_boton': boton,
-                            'name': name,
-                            'value': value,
-                            'paginas_personales': pag_personales,
-                            'color': color_fondo})
         elif request.method == 'POST':
             value = request.body.decode('utf-8').split("=")[1]
             if value == "Accesibilidad":
@@ -190,18 +155,19 @@ def pag_principal(request):
             else:
                 boton = "Mostrar accesibles"
             listaMasComentados = listaMasComentados[:5]
-            c = RequestContext(request, {'listaMasComentados':listaMasComentados,
-                                'form_boton': boton,
-                                'name': name,
-                                'value':value,
-                                'paginas_personales': pag_personales,
-                                'color': color_fondo})
         else:
             plantilla = get_template("Kinda_Cloudy/error.html")
             error = "Método no permitido"
             c = RequestContext(request, {'error': error})
             respuesta = plantilla.render(c)
             return HttpResponse(respuesta)
+        c = RequestContext(request, {'listaMasComentados':listaMasComentados,
+                            'form_boton': boton,
+                            'name': name,
+                            'value':value,
+                            'paginas_personales': pag_personales,
+                            'color': color_fondo,
+                            'tamano': tamano})
         respuesta = plantilla.render(c)
         return HttpResponse(respuesta)
 
@@ -210,6 +176,18 @@ def pag_principal(request):
 def pag_museos(request):
     global accesibilidad
     plantilla = get_template("Kinda_Cloudy/pag_museos.html")
+    tamano = "13px"
+    color_fondo = "#D3D3D3"
+    try:
+        usuario = User.objects.get(username=request.user)
+        color_user = Configuracion.objects.get(usuario=usuario).color_fondo
+        letra_user = Configuracion.objects.get(usuario=usuario).letra_size
+        if(usuario.is_authenticated and not color_user == "Null"):
+            color_fondo = color_user
+            tamano = letra_user
+    except (User.DoesNotExist, Configuracion.DoesNotExist):
+        color_fondo = "#D3D3D3"
+        tamano = "13px"
     todos_museos = Museo.objects.all()
     if accesibilidad:
         todos_museos = todos_museos.filter(accesibilidad=1)
@@ -225,54 +203,49 @@ def pag_museos(request):
     menu_desplegable += "<input type='submit' value='Enviar'>"
     menu_desplegable += "</form>"
     if request.method == "GET":
-        museos = "<ul>"
-        for museo in todos_museos:
-            museos += "<li>"
-            museos += "<b><a href='/museos/" + museo.id_entidad + "'>" + museo.nombre
-            museos += "</a></b>"
-            museos += "</li>"
-        museos += "</ul>"
-        funcionamiento = "Pulse sobre el nombre del museo"
-        funcionamiento += " para ir a su página"
-        c = RequestContext(request, {'menu': menu_desplegable, 'funcionamiento': funcionamiento, 'museos': museos})
-        respuesta = plantilla.render(c)
-        return HttpResponse(respuesta)
+        c = RequestContext(request, {'menu': menu_desplegable,
+                        'museos': todos_museos,
+                        'color': color_fondo,
+                        'tamano': tamano})
     elif request.method == "POST":
         distrito = request.body.decode('utf-8').split("=")[1].replace("+"," ")
         if distrito == "TODOS":
-            museos = "<ul>"
-            for museo in todos_museos:
-                museos += "<li>"
-                museos += "<b><a href="">" + museo.nombre
-                museos += "</a></b>"
-                museos += "</li>"
-            museos += "</ul>"
-            funcionamiento = "Pulse sobre el nombre del museo"
-            funcionamiento += " para ir a su página"
-            c = RequestContext(request, {'menu': menu_desplegable, 'funcionamiento': funcionamiento, 'museos': museos})
-            respuesta = plantilla.render(c)
-            return HttpResponse(respuesta)
+            c = RequestContext(request, {'menu': menu_desplegable,
+                                        'museos': todos_museos,
+                                        'color': color_fondo,
+                                        'tamano': tamano})
         else:
             museos_filtrados = Museo.objects.all().filter(distrito=distrito)
-            museos = "<ul>"
-            for museo in museos_filtrados:
-                museos += "<li>"
-                museos += "<b><a href="">" + museo.nombre
-                museos += "</a></b>"
-                museos += "</li>"
-            museos += "</ul>"
             informacion = "Estás viendo los museos de " + distrito
-            funcionamiento = "Pulse sobre el nombre del museo"
-            funcionamiento += " para ir a su página"
-            c = RequestContext(request, {'menu': menu_desplegable, 'funcionamiento': funcionamiento, 'museos': museos, 'informacion': informacion})
-            respuesta = plantilla.render(c)
-            return HttpResponse(respuesta)
+            c = RequestContext(request, {'menu': menu_desplegable,
+                                        'museos': museos_filtrados,
+                                        'informacion': informacion,
+                                        'color': color_fondo,
+                                        'tamano': tamano})
     else:
-        return HttpResponse("Hola")
+        plantilla = get_template("Kinda_Cloudy/error.html")
+        error = "Método no permitido"
+        c = RequestContext(request, {'error': error})
+        respuesta = plantilla.render(c)
+        return HttpResponse(respuesta)
+    respuesta = plantilla.render(c)
+    return HttpResponse(respuesta)
 
 @csrf_exempt
 def pag_museo(request, resource):
     plantilla = get_template("Kinda_Cloudy/pag_museo.html")
+    tamano = "13px"
+    color_fondo = "#D3D3D3"
+    try:
+        usuario = User.objects.get(username=request.user)
+        color_user = Configuracion.objects.get(usuario=usuario).color_fondo
+        letra_user = Configuracion.objects.get(usuario=usuario).letra_size
+        if(usuario.is_authenticated and not color_user == "Null"):
+            color_fondo = color_user
+            tamano = letra_user
+    except (User.DoesNotExist, Configuracion.DoesNotExist):
+        color_fondo = "#D3D3D3"
+        tamano = "13px"
     todos_museos = Museo.objects.all()
     museo = todos_museos.get(id_entidad=resource)
     datos_museo = "<b><h2>" + museo.nombre + "</h2></b>"
@@ -322,14 +295,27 @@ def pag_museo(request, resource):
         return HttpResponse(respuesta)
     c = RequestContext(request, {'datos_museo': datos_museo,
                                 'boton': boton_add,
-                                'form_coment':FORM_COMENTARIO,
-                                'comentarios': comentarios})
+                                'comentarios': comentarios,
+                                'color': color_fondo,
+                                'tamano': tamano})
     respuesta = plantilla.render(c)
     return HttpResponse(respuesta)
 
 @csrf_exempt
 def pag_user(request, resource):
     plantilla = get_template("Kinda_Cloudy/pag_usuario.html")
+    tamano = "13px"
+    color_fondo = "#D3D3D3"
+    try:
+        usuario = User.objects.get(username=request.user)
+        color_user = Configuracion.objects.get(usuario=usuario).color_fondo
+        letra_user = Configuracion.objects.get(usuario=usuario).letra_size
+        if(usuario.is_authenticated and not color_user == "Null"):
+            color_fondo = color_user
+            tamano = letra_user
+    except (User.DoesNotExist, Configuracion.DoesNotExist):
+        color_fondo = "#D3D3D3"
+        tamano = "13px"
     boton_mas = "<form method = 'POST'><button type='submit' "
     boton_mas += "name='Mas' value=1>Más"
     boton_mas += "</button>"
@@ -381,18 +367,29 @@ def pag_user(request, resource):
     c = RequestContext(request, {'usuarioname':resource,
             'usuario': usuario,
             'titulo': pag_user.titulo,
-            'form_titulo': FORM_TITULO,
-            'form_letra': FORM_LETRA,
-            'form_color': FORM_COLOR,
             'boton_mas': boton_mas,
-            'seleccionados':museos_seleccionados})
+            'seleccionados':museos_seleccionados,
+            'color': color_fondo,
+            'tamano':tamano})
     respuesta = plantilla.render(c)
     return HttpResponse(respuesta)
 
 
 def about(request):
     plantilla = get_template("Kinda_Cloudy/about.html")
-    c = RequestContext(request,{});
+    tamano = "13px"
+    color_fondo = "#D3D3D3"
+    try:
+        usuario = User.objects.get(username=request.user)
+        color_user = Configuracion.objects.get(usuario=usuario).color_fondo
+        letra_user = Configuracion.objects.get(usuario=usuario).letra_size
+        if(usuario.is_authenticated and not color_user == "Null"):
+            color_fondo = color_user
+            tamano = letra_user
+    except (User.DoesNotExist, Configuracion.DoesNotExist):
+        color_fondo = "#D3D3D3"
+        tamano = "13px"
+    c = RequestContext(request,{'color': color_fondo, 'tamano': tamano});
     respuesta = plantilla.render(c)
     return HttpResponse(respuesta)
 
