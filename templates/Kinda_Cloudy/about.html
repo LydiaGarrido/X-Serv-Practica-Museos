@@ -17,35 +17,37 @@
 {% block main %}
 
 <div class="main">
+    <div class="letra">
     {% csrf_token %}
-    <h2>Autora: Lydia Garrido Muñoz</h2>
-    <h3>Funcionamiento de la página:</h3>
-    <ul>
-        <li><h3><b>/ Pagina principal de la practica:</b></h3></li>
-        Muestra un listado de los 5 museos más comentados. Si no hay 5 museos con comentarios,
-        se mostrarán sólo los que tengan comentarios.<br>
-        Para cada museo se muestra su nombre (que es un enlace que apunta a la URL del museo
-        en el portal esmadrid), su dirección y un enlace "Más información" que apunta a la página del museo
-        dentro de la aplicación.<br>
-        En el lateral, muestra un listado con enlaces a las páginas personales disponibles. Para cada página personal
-        se muestra el usuario y el titulo de su página.<br>
-        También se muestra un botón que activa o desactiva la accesibilidad (activada sólo muestra los museos con accesibilidad en toda la aplicación)
-        <li><h3><b>/usuario:</h3></b></li>
-        Corresponde al usuario "usuario". Muestra los museos seleccionados por ese usuario. Para cada museo se muestra la misma información que en la
-        página principal y la fecha en la que fue seleccionado por el usuario.
-        Una vez el usuario se ha autenticado, podrá cambiar el color de fondo y la letra de todo el sitio con un formulario. También podrá elegir el titulo de su página personal.
-        <li><h3><b>/museos:</h3></b></li>
-        Página con todos los museos. Para cada museo muestra el nombre y un enlace a su página personal.
-        Cuenta con un menú desplegable para filtrar según el distrito.
-        <li><h3><b>/museos/id:</h3></b></li>
-        Página de un museo en la aplicación. Se muestra una descripción del museo, si es accesible o no, el horario, su direccion y datos de contacto. Tambien se muestran los comentarios
-        que se han hecho sobre él.
-        Una vez el usuario se ha autenticado, muestra un formulario para poner un comentario al museo.
-        <li><h3><b>usuario/xml:</h3></b></li>
-        Canal XML para los museos seleccionados por ese usuario.
-        <li><h3><b>/about:</h3></b></li>
-        Página con información sobre autoría y funcionamiento de la aplicación.
-    </ul>
+        <h2>Autora: Lydia Garrido Muñoz</h2>
+        <h3>Funcionamiento de la página:</h3>
+        <ul>
+            <li><h3><b>/ Pagina principal de la practica:</b></h3></li>
+            Muestra un listado de los 5 museos más comentados. Si no hay 5 museos con comentarios,
+            se mostrarán sólo los que tengan comentarios.<br>
+            Para cada museo se muestra su nombre (que es un enlace que apunta a la URL del museo
+            en el portal esmadrid), su dirección y un enlace "Más información" que apunta a la página del museo
+            dentro de la aplicación.<br>
+            En el lateral, muestra un listado con enlaces a las páginas personales disponibles. Para cada página personal
+            se muestra el usuario y el titulo de su página.<br>
+            También se muestra un botón que activa o desactiva la accesibilidad (activada sólo muestra los museos con accesibilidad en toda la aplicación)
+            <li><h3><b>/usuario:</h3></b></li>
+            Corresponde al usuario "usuario". Muestra los museos seleccionados por ese usuario. Para cada museo se muestra la misma información que en la
+            página principal y la fecha en la que fue seleccionado por el usuario.
+            Una vez el usuario se ha autenticado, podrá cambiar el color de fondo y la letra de todo el sitio con un formulario. También podrá elegir el titulo de su página personal.
+            <li><h3><b>/museos:</h3></b></li>
+            Página con todos los museos. Para cada museo muestra el nombre y un enlace a su página personal.
+            Cuenta con un menú desplegable para filtrar según el distrito.
+            <li><h3><b>/museos/id:</h3></b></li>
+            Página de un museo en la aplicación. Se muestra una descripción del museo, si es accesible o no, el horario, su direccion y datos de contacto. Tambien se muestran los comentarios
+            que se han hecho sobre él.
+            Una vez el usuario se ha autenticado, muestra un formulario para poner un comentario al museo.
+            <li><h3><b>usuario/xml:</h3></b></li>
+            Canal XML para los museos seleccionados por ese usuario.
+            <li><h3><b>/about:</h3></b></li>
+            Página con información sobre autoría y funcionamiento de la aplicación.
+        </ul>
+    </div>
 </div>
 
 {% endblock %}
