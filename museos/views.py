@@ -265,6 +265,9 @@ def pag_museo(request, resource):
     datos_museo += "<br>" + museo.coordenada_x + ", "
     datos_museo += museo.coordenada_y
     datos_museo += "<br>" + museo.latitud + ", " + museo.longitud
+    datos_museo += "<br><b>DATOS DE CONTACTO</b>:<br>"
+    datos_museo += museo.telefono + ", fax:" +  museo.fax + " "
+    datos_museo += "<br>email:" + museo.email
     boton_add = "<form method = 'POST'><button type='submit' "
     boton_add += "name='Add' value=1>Add"
     boton_add += "</button>"
@@ -392,6 +395,22 @@ def about(request):
     c = RequestContext(request,{'color': color_fondo, 'tamano': tamano});
     respuesta = plantilla.render(c)
     return HttpResponse(respuesta)
+
+def xml_usuario(request, resource):
+    try:
+        usuario = User.objects.get(username=resource)
+    except User.DoesNotExist:
+        plantilla = get_template("Kinda_Cloudy/error.html")
+        error = "El usuario no existe"
+        c = RequestContext(request,{'error': error})
+        respuesta = plantilla.render(c)
+        return HttpResponse(respuesta)
+    plantilla = get_template('xml/canal_usuario.xml')
+    museos_seleccionados = Seleccion.objects.filter(usuario=usuario)
+    c = RequestContext(request, {'usuario': usuario,
+                              'museos_seleccionados': museos_seleccionados})
+    respuesta = plantilla.render(c)
+    return HttpResponse(respuesta, content_type="text/xml")
 
 @csrf_exempt
 def loginUser(request):

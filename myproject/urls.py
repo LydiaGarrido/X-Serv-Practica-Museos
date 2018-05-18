@@ -15,5 +15,6 @@ urlpatterns = [
     url(r'^museos/(\d+)$', views.pag_museo, name='Pagina de cada museo'),
     url(r'^logout$', views.logoutUser),
     url(r'^login$', views.loginUser),
+    url(r'^(.+)/xml', views.xml_usuario, name="XML de usuario"),
     url(r'^(.+)', views.pag_user, name="Pagina personal del usuario"),
 ]
