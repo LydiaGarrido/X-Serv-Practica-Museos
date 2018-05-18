@@ -374,14 +374,14 @@ def pag_user(request, resource):
             n = request.body.decode('utf-8').split("=")[1]
             n = int(n) + 5
             museos_seleccionados = Seleccion.objects.filter(usuario=usuario)
-            museos_seleccionados = museos_seleccionados[n:n+5]
-            if(len(museos_seleccionados) >= n):
+            try:
+                museos_seleccionados = museos_seleccionados[n:n+5]
                 boton_mas = "<form method = 'POST'><button type='submit' "
                 boton_mas += "name='Mas' value=" + str(n) + ">Más"
-                boton_mas += "</button>"
-                boton_mas += "</form>"
-            else:
+                boton_mas += "</button></form>"
+            except:
                 boton_mas = ""
+            museos_seleccionados = museos_seleccionados[n:n+5]
     else:
         plantilla = get_template("Kinda_Cloudy/error.html")
         error = "Método no permitido"
