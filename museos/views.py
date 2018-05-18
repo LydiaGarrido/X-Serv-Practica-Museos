@@ -375,7 +375,7 @@ def pag_user(request, resource):
             n = int(n) + 5
             museos_seleccionados = Seleccion.objects.filter(usuario=usuario)
             try:
-                museos_seleccionados = museos_seleccionados[n:n+5]
+                museo = museos_seleccionados[n+5]
                 boton_mas = "<form method = 'POST'><button type='submit' "
                 boton_mas += "name='Mas' value=" + str(n) + ">Más"
                 boton_mas += "</button></form>"
