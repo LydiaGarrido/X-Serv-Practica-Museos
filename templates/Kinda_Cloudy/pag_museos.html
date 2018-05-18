@@ -1,0 +1,35 @@
+{% extends "Kinda_Cloudy/base.html" %}
+{% load staticfiles %}
+{% block side %}
+
+
+
+{% endblock %}
+{% block menu %}
+<div id="nav">
+    <ul>
+        <a href="/">Inicio</a>
+        <a href="/museos">Todos</a>
+        <a href="/about">About</a>
+    </ul>
+</div>
+{% endblock %}s
+{% block main %}
+
+<div class="main">
+    {% csrf_token %}
+    {{menu|safe}}
+    <h3>Pulse sobre el nombre del museo para ir a su página</h3><p>
+    <div class="letra">
+        {{informacion|safe}}
+        <h2>Lista de museos: </h2>
+        <ul>
+            {% for museo in museos %}
+                <li><b><a href='/museos/{{museo.id_entidad}}'>{{museo.nombre}}
+                </a></b></li>
+            {% endfor %}
+        <ul>
+    </div>
+</div>
+
+{% endblock %}

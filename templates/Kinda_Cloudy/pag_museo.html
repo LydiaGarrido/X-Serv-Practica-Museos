@@ -1,0 +1,44 @@
+{% extends "Kinda_Cloudy/base.html" %}
+{% load staticfiles %}
+{% block side %}
+
+
+
+
+{% endblock %}
+{% block menu %}
+<div id="nav">
+    <ul>
+        <a href="/">Inicio</a>
+        <a href="/museos">Todos</a>
+        <a href="/about">About</a>
+    </ul>
+    </div>
+{% endblock %}
+{% block main %}
+
+<div class="main">
+    <div class="letra">
+    {% csrf_token %}
+        {{datos_museo|safe}}
+    </div>
+    {% if user.is_authenticated %}
+        {{boton|safe}}
+        <p>
+        <form method='POST'><h3><b>Introduce un comentario:</b></h3>
+    	    <input type='text' name='Comentario'>
+            <input type='submit' value='Enviar'>
+        </form>
+    {% endif %}
+    <div class="letra">
+        <h3><b>Comentarios del museo: </b></h3>
+        <ul>
+		{% for comentario in comentarios %}
+			<li>{{comentario.comentario|safe}}<br>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+</div>
+
+{% endblock %}

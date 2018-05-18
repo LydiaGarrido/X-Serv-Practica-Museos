@@ -1,0 +1,23 @@
+{% extends "Kinda_Cloudy/base.html" %}
+{% load staticfiles %}
+{% block side %}
+
+
+{% endblock %}
+{% block menu %}
+<div id="nav">
+    <ul>
+        <a href="/">Inicio</a>
+        <a href="/museos">Todos</a>
+        <a href="/about">About</a>
+    </ul>
+</div>
+{% endblock %}
+{% block main %}
+
+<div class="main">
+    {% csrf_token %}
+    {{error|safe}}
+</div>
+
+{% endblock %}

@@ -256,7 +256,9 @@ def pag_museo(request, resource):
         datos_museo += "Sí<br>"
     else:
         datos_museo += "No<br>"
-    datos_museo += "<b>DIRECCION</b>:<br>"
+    datos_museo += "<b>HORARIO</b>:<br>"
+    datos_museo += museo.horario
+    datos_museo += "<b><br>DIRECCION</b>:<br>"
     datos_museo += museo.clase_vial + " " + museo.nombre_via + " "
     datos_museo += museo.tipo_num + " " + museo.num + "<br>"
     datos_museo += museo.localidad + ", " + museo.provincia
@@ -319,9 +321,17 @@ def pag_user(request, resource):
     except (User.DoesNotExist, Configuracion.DoesNotExist):
         color_fondo = "#D3D3D3"
         tamano = "13px"
-    boton_mas = "<form method = 'POST'><button type='submit' "
-    boton_mas += "name='Mas' value=1>Más"
-    boton_mas += "</button>"
+    usuario = User.objects.get(username=resource)
+    museos_seleccionados = Seleccion.objects.filter(usuario=usuario)
+    boton_mas = ""
+    if(len(museos_seleccionados) <= 5):
+        museos_seleccionados = museos_seleccionados[:5]
+    else:
+        museos_seleccionados = museos_seleccionados[:5]
+        boton_mas = "<form method = 'POST'><button type='submit' "
+        boton_mas += "name='Mas' value=0>Más"
+        boton_mas += "</button>"
+        boton_mas += "</form>"
     if request.method == 'GET':
         try:
             usuario = User.objects.get(username=resource)
@@ -340,27 +350,38 @@ def pag_user(request, resource):
             pag_user.save()
             return HttpResponseRedirect('/' + resource)
     elif request.method == 'POST':
-        value = request.body.decode('utf-8').split("=")[0]
+        name = request.body.decode('utf-8').split("=")[0]
         usuario = User.objects.get(username=resource)
         pag_user = Configuracion.objects.get(usuario=usuario)
         museos_seleccionados = Seleccion.objects.filter(usuario=usuario)
         museos_seleccionados = museos_seleccionados[:5]
-        if value == 'Title':
+        if name == 'Title':
             title = request.body.decode('utf-8').split("=")[1].replace("+", " ")
             if title == "": #Si se envia el formulario vacío
                 pag_user.titulo = "Pagina de " + resource
             else:
                 pag_user.titulo = title
             pag_user.save()
-        elif value == 'Letra':
+        elif name == 'Letra':
             letra = request.body.decode('utf-8').split("=")[1]
             pag_user.letra_size = letra
             pag_user.save()
-            print(pag_user.letra_size)
-        elif value == 'Color':
+        elif name == 'Color':
             color_fondo = request.body.decode('utf-8').split("=")[1]
             pag_user.color_fondo = color_fondo
             pag_user.save()
+        elif name == 'Mas':
+            n = request.body.decode('utf-8').split("=")[1]
+            n = int(n) + 5
+            museos_seleccionados = Seleccion.objects.filter(usuario=usuario)
+            museos_seleccionados = museos_seleccionados[n:n+5]
+            if(len(museos_seleccionados) >= n):
+                boton_mas = "<form method = 'POST'><button type='submit' "
+                boton_mas += "name='Mas' value=" + str(n) + ">Más"
+                boton_mas += "</button>"
+                boton_mas += "</form>"
+            else:
+                boton_mas = ""
     else:
         plantilla = get_template("Kinda_Cloudy/error.html")
         error = "Método no permitido"

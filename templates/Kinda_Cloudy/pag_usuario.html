@@ -1,0 +1,86 @@
+{% extends "Kinda_Cloudy/base.html" %}
+{% load staticfiles %}
+{% block side %}
+
+
+
+{% endblock %}
+{% block menu %}
+<div id="nav">
+    <ul>
+        <a href="/">Inicio</a>
+        <a href="/museos">Todos</a>
+        <a href="/about">About</a>
+    </ul>
+    </div>
+{% endblock %}
+
+{% block main %}
+<div class="main">
+    <div class="letra">
+    {% csrf_token %}
+        <h2><b>{{titulo}}</b></h2>
+        {% if user.is_authenticated %}
+            {% if user.username == usuarioname %}
+            <form method = 'POST'>
+                <b><br>Titulo de la página:
+                </b><br>
+                <input type='text' name='Title'><br>
+                <input type='submit' value='Enviar'>
+            </form>
+            <form method='POST'>
+                <b>Tamaño letra:</b>
+                <select name='Letra'>
+                    <option value='10px'>10</option>
+                    <option value='16px'>16</option>
+                    <option value='19px'>19</option>
+                    <option value='22px'>22</option>
+                    <option value='13px'>Default(13)</option>
+                </select>
+                <input type='submit' value='Enviar'>
+            </form>
+            <form method='POST'>
+                <b>Color de fondo:</b>
+                <select name='Color'>
+                    <option value='blue'>Azul</option>
+                    <option value='red'>Rojo</option>
+                    <option value='white'>Blanco</option>
+                    <option value='pink'>Rosa</option>
+                    <option value='orange'>Naranja</option>
+                    <option value='#D3D3D3'>Default</option>
+                </select>
+                <input type='submit' value='Enviar'>
+            </form>
+                {% endif %}
+            {% endif %}
+            <h3><b>Lista de museos añadidos:</b></h3>
+        <ul>
+            {% for seleccionado in seleccionados %}
+                <li>
+                <b><a href='{{seleccionado.museo.content_url}}'
+                >{{seleccionado.museo.nombre}}</a>
+                <br><b>DIRECCION</b>:<br>
+                {{seleccionado.museo.clase_vial}}
+                {{seleccionado.museo.nombre_via}}
+                {{seleccionado.museo.tipo_num}}
+                {{seleccionado.museo.num}}<br>
+                {{seleccionado.museo.localidad}},
+                {{seleccionado.museo.provincia}}
+                <br>{{seleccionado.museo.codigo_postal}}
+                <br>{{seleccionado.museo.barrio}}
+                {{seleccionado.museo.distrito}}
+                <br>{{seleccionado.museo.coordenada_x}},
+                {{seleccionado.museo.coordenada_y}}
+                <br>{{seleccionado.museo.latitud}}
+                ,{{seleccionado.museo.longitud}}<br>
+                <b><a href='/museos/{{seleccionado.museo.id_entidad}}'>Más información</a>
+                <br> Seleccionado en la fecha: {{seleccionado.fecha}}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+        {{boton_mas|safe}}
+</div>
+
+{% endblock %}

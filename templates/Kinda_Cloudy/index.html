@@ -1,0 +1,47 @@
+{% extends "Kinda_Cloudy/base.html" %}
+{% load staticfiles %}
+
+{% block side %}
+{% csrf_token %}
+<div class="lateral">
+    <div class="content">
+        <div class="letra">
+            <h3>Páginas personales:</h3>
+            <p>{{paginas_personales|safe}}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block main %}
+
+<div class="main">
+    {% csrf_token %}
+    <div class="letra">
+        <h1>Lista de museos más comentados:</h1>
+        <ul>
+            {% for museo in listaMasComentados %}
+                <li>
+                <b><a href='{{museo.content_url}}'>{{museo.nombre}}
+                </a>
+                <br><b>DIRECCION</b>:<br>
+                {{museo.clase_vial}}  {{museo.nombre_via}}
+                {{museo.tipo_num}} {{museo.num}} <br>
+                {{museo.localidad}} , {{museo.provincia}}
+                <br> {{museo.codigo_postal}}
+                <br> {{museo.barrio}} {{museo.distrito}}
+                <br> {{museo.coordenada_x}} ,
+                {{museo.coordenada_y}}
+                <br> {{museo.latitud}} , {{museo.longitud}} <br>
+                <b><a href='/museos/{{museo.id_entidad}}'>Más información
+                </a></li>
+            {% endfor %}
+        </ul>
+        {{saludo|safe}}<p>
+    </div>
+        <form method = 'POST'><button type='submit' name='{{name}}' value='{{value}}'>
+        {{form_boton}}
+        </button>
+</div>
+
+{% endblock %}
