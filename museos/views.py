@@ -433,6 +433,17 @@ def xml_usuario(request, resource):
     respuesta = plantilla.render(c)
     return HttpResponse(respuesta, content_type="text/xml")
 
+def xml_main(request):
+    plantilla = get_template('xml/canal_main.xml')
+    listaMasComentados = Museo.objects.all().order_by('-num_coment')
+    listaMasComentados = listaMasComentados.exclude(num_coment=0)
+    listaMasComentados = listaMasComentados[:5]
+    pag_personales = Configuracion.objects.all()
+    c = RequestContext(request, {'paginas_personales': pag_personales,
+                              'museosMasComentados': listaMasComentados})
+    respuesta = plantilla.render(c)
+    return HttpResponse(respuesta, content_type="text/xml")
+
 @csrf_exempt
 def loginUser(request):
     if request.method == "POST":

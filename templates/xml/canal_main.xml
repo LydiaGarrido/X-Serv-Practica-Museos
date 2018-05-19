@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Contenidos>
+    <infoDataset>
+        <nombre>Canal XML Main</nombre>
+        <descripcion> Datos del main de los Museos más comentados y lista de páginas de usuarios.
+        </descripcion>
+    </infoDataset>
+    {% for museo in museosMasComentados %}
+        <contenido>
+            <tipo>EntidadesYOrganismos</tipo>
+            <atributos idioma="es">
+                <atributo nombre="NOMBRE">{{museo.nombre}}</atributo>
+                <atributo nombre="CONTENT-URL">{{museo.content_url}}</atributo>
+                <atributo nombre="LOCALIZACION">
+                    <atributo nombre="NOMBRE-VIA">{{museo.nombre_via}}</atributo>
+                    <atributo nombre="CLASE-VIAL">{{museo.clase_vial}}</atributo>
+                    <atributo nombre="TIPO-NUM">{{museo.tipo_num}}</atributo>
+                    <atributo nombre="NUM">{{museo.num}}</atributo>
+                    <atributo nombre="PLANTA">{{museo.planta}}</atributo>
+                    <atributo nombre="ORIENTACION">{{museo.orientacion}}</atributo>
+                    <atributo nombre="LOCALIDAD">{{museo.localidad}}</atributo>
+                    <atributo nombre="PROVINCIA">{{museo.provincia}}</atributo>
+                    <atributo nombre="CODIGO-POSTAL">{{museo.codigo_postal}}</atributo>
+                    <atributo nombre="BARRIO">{{museo.barrio}}</atributo>
+                    <atributo nombre="DISTRITO">{{museo.distrito}}</atributo>
+                    <atributo nombre="COORDENADA-X">{{museo.coordenada_x}}</atributo>
+                    <atributo nombre="COORDENADA-Y">{{museo.coordenada_y}}</atributo>
+                    <atributo nombre="LATITUD">{{museo.latitud}}</atributo>
+                    <atributo nombre="LONGITUD">{{museo.longitud}}</atributo>
+                </atributo>
+            </atributos>
+        </contenido>
+        {% endfor %}
+        {% for pag_personal in paginas_personales %}
+        <contenido>
+            <atributos idioma="es">
+                <atributo nombre="USUARIO">{{pag_personal.usuario}}</atributo>
+                <atributo nombre="TITULO">{{pag_personal.titulo}}</atributo>
+            </atributos>
+        </contenido>
+    {% endfor %}
+</Contenidos>
