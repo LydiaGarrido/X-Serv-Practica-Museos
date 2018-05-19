@@ -434,9 +434,12 @@ def xml_usuario(request, resource):
     return HttpResponse(respuesta, content_type="text/xml")
 
 def xml_main(request):
+    global accesibilidad
     plantilla = get_template('xml/canal_main.xml')
     listaMasComentados = Museo.objects.all().order_by('-num_coment')
     listaMasComentados = listaMasComentados.exclude(num_coment=0)
+    if accesibilidad:
+        listaMasComentados = listaMasComentados.filter(accesibilidad=1)    
     listaMasComentados = listaMasComentados[:5]
     pag_personales = Configuracion.objects.all()
     c = RequestContext(request, {'paginas_personales': pag_personales,
