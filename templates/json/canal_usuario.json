@@ -1,0 +1,40 @@
+{
+    "Museos añadidos": {
+        "title": "Canal JSON de {{usuario}}",
+        {% for museo_selec in museos_seleccionados %}
+        "Museo añadido":{
+            "ID-ENTIDAD":"{{museo_selec.museo.id_entidad}}",
+            "NOMBRE": "{{museo_selec.museo.nombre}}",
+            "DESCRIPCION-ENTIDAD": "{{museo_selec.museo.descripcion_entidad}}",
+            "HORARIO": "{{museo_selec.museo.horario}}",
+            "EQUIPAMIENTO": "{{museo_selec.museo.equipamiento}}",
+            "TRANSPORTE": "{{museo_selec.museo.transporte}}",
+            "DESCRIPCION": "{{museo_selec.museo.descripcion}}",
+            "ACCESIBILIDAD": "{{museo_selec.museo.accesibilidad}}",
+            "CONTENT-URL": "{{museo_selec.museo.content_url}}",
+            "TRANSPORTE": "{{museo_selec.museo.transporte}}",
+            "LOCALIZACION":{
+                "NOMBRE-VIA": "{{museo_selec.museo.nombre_via}}",
+                "CLASE-VIAL": "{{museo_selec.museo.clase_vial}}",
+                "TIPO-NUM": "{{museo_selec.museo.tipo_num}}",
+                "NUM": "{{museo_selec.museo.num}}",
+                "PLANTA": "{{museo_selec.museo.planta}}",
+                "ORIENTACION": "{{museo_selec.museo.orientacion}}",
+                "LOCALIDAD": "{{museo_selec.museo.localidad}}",
+                "PROVINCIA": "{{museo_selec.museo.provincia}}",
+                "CODIGO-POSTAL": "{{museo_selec.museo.codigo_postal}}",
+                "BARRIO": "{{museo_selec.museo.barrio}}",
+                "DISTRITO": "{{museo_selec.museo.distrito}}",
+                "COORDENADA-X": "{{museo_selec.museo.coordenada_x}}",
+                "COORDENADA-Y": "{{museo_selec.museo.coordenada_y}}",
+                "LATITUD": "{{museo_selec.museo.latitud}}",
+                "LONGITUD": "{{museo_selec.museo.longitud}}"
+            },
+            "DATOSCONTACTOS":{
+                "TELEFONO": "{{museo_selec.museo.telefono}}",
+                "FAX": "{{museo_selec.museo.fax}}",
+                "EMAIL": "{{museo_selec.museo.email}}"
+            },
+        }{% endfor %}
+   }
+}

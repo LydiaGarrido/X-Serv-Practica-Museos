@@ -439,13 +439,43 @@ def xml_main(request):
     listaMasComentados = Museo.objects.all().order_by('-num_coment')
     listaMasComentados = listaMasComentados.exclude(num_coment=0)
     if accesibilidad:
-        listaMasComentados = listaMasComentados.filter(accesibilidad=1)    
+        listaMasComentados = listaMasComentados.filter(accesibilidad=1)
     listaMasComentados = listaMasComentados[:5]
     pag_personales = Configuracion.objects.all()
     c = RequestContext(request, {'paginas_personales': pag_personales,
                               'museosMasComentados': listaMasComentados})
     respuesta = plantilla.render(c)
     return HttpResponse(respuesta, content_type="text/xml")
+
+def json_usuario(request, resource):
+    try:
+        usuario = User.objects.get(username=resource)
+    except User.DoesNotExist:
+        plantilla = get_template("Kinda_Cloudy/error.html")
+        error = "El usuario no existe"
+        c = RequestContext(request,{'error': error})
+        respuesta = plantilla.render(c)
+        return HttpResponse(respuesta)
+    plantilla = get_template('json/canal_usuario.json')
+    museos_seleccionados = Seleccion.objects.filter(usuario=usuario)
+    c = RequestContext(request, {'usuario': usuario,
+                              'museos_seleccionados': museos_seleccionados})
+    respuesta = plantilla.render(c)
+    return HttpResponse(respuesta, content_type="text/json")
+
+def json_main(request):
+    global accesibilidad
+    plantilla = get_template('json/canal_main.json')
+    listaMasComentados = Museo.objects.all().order_by('-num_coment')
+    listaMasComentados = listaMasComentados.exclude(num_coment=0)
+    if accesibilidad:
+        listaMasComentados = listaMasComentados.filter(accesibilidad=1)
+    listaMasComentados = listaMasComentados[:5]
+    pag_personales = Configuracion.objects.all()
+    c = RequestContext(request, {'paginas_personales': pag_personales,
+                              'museosMasComentados': listaMasComentados})
+    respuesta = plantilla.render(c)
+    return HttpResponse(respuesta, content_type="text/json")
 
 @csrf_exempt
 def loginUser(request):

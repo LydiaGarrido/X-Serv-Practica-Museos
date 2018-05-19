@@ -1,0 +1,36 @@
+{
+    "Página principal": {
+        "title": "Canal JSON del Main",
+        "Museos más comentados":{
+            {% for museo in museosMasComentados %}
+            "Museo":{
+                "NOMBRE": "{{museo.nombre}}",
+                "CONTENT-URL": "{{museo.content_url}}",
+                "LOCALIZACION":{
+                    "NOMBRE-VIA": "{{museo.nombre_via}}",
+                    "CLASE-VIAL": "{{museo.clase_vial}}",
+                    "TIPO-NUM": "{{museo.tipo_num}}",
+                    "NUM": "{{museo.num}}",
+                    "PLANTA": "{{museo.planta}}",
+                    "ORIENTACION": "{{museo.orientacion}}",
+                    "LOCALIDAD": "{{museo.localidad}}",
+                    "PROVINCIA": "{{museo.provincia}}",
+                    "CODIGO-POSTAL": "{{museo.codigo_postal}}",
+                    "BARRIO": "{{museo.barrio}}",
+                    "DISTRITO": "{{museo.distrito}}",
+                    "COORDENADA-X": "{{museo.coordenada_x}}",
+                    "COORDENADA-Y": "{{museo.coordenada_y}}",
+                    "LATITUD": "{{museo.latitud}}",
+                    "LONGITUD": "{{museo.longitud}}"
+                },
+                }{% endfor %}
+            },
+            "Lista de páginas de usuarios":{
+                {% for pag_personal in paginas_personales %}
+                "Página de usuario":{
+                    "USUARIO": "{{pag_personal.usuario}}",
+                    "TITULO": "{{pag_personal.titulo}}",
+                }
+            }}{% endfor %}
+        }
+    }
