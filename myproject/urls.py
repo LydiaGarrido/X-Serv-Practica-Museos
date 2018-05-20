@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^museos$', views.pag_museos, name='Todos los museos'),
     url(r'^about$', views.about, name="About"),
     url(r'^museos/(\d+)$', views.pag_museo, name='Pagina de cada museo'),
+    url(r'^videos$', views.videos, name='Video de funcionamiento'),
     url(r'^logout$', views.logoutUser),
     url(r'^login$', views.loginUser),
     url(r'^xml$', views.xml_main, name="XML de Main"),

@@ -484,6 +484,24 @@ def rss_comentarios(request):
     respuesta = plantilla.render(c)
     return HttpResponse(respuesta, content_type="text/rss+xml")
 
+def videos(request):
+    plantilla = get_template('Kinda_Cloudy/videos.html')
+    tamano = "13px"
+    color_fondo = "#D3D3D3"
+    try:
+        usuario = User.objects.get(username=request.user)
+        color_user = Configuracion.objects.get(usuario=usuario).color_fondo
+        letra_user = Configuracion.objects.get(usuario=usuario).letra_size
+        if(usuario.is_authenticated and not color_user == "Null"):
+            color_fondo = color_user
+            tamano = letra_user
+    except (User.DoesNotExist, Configuracion.DoesNotExist):
+        color_fondo = "#D3D3D3"
+        tamano = "13px"
+    c = RequestContext(request, {'color':color_fondo, 'tamano': tamano})
+    respuesta = plantilla.render(c)
+    return HttpResponse(respuesta)
+
 @csrf_exempt
 def loginUser(request):
     if request.method == "POST":
