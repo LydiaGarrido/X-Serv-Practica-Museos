@@ -17,6 +17,7 @@ urlpatterns = [
     url(r'^login$', views.loginUser),
     url(r'^xml$', views.xml_main, name="XML de Main"),
     url(r'^json$', views.json_main, name="JSON de Main"),
+    url(r'^rss$', views.rss_comentarios, name="RSS de comentarios"),
     url(r'^(.+)/xml', views.xml_usuario, name="XML de usuario"),
     url(r'^(.+)/json', views.json_usuario, name="JSON de usuario"),
     url(r'^(.+)', views.pag_user, name="Pagina personal del usuario"),

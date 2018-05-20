@@ -477,6 +477,13 @@ def json_main(request):
     respuesta = plantilla.render(c)
     return HttpResponse(respuesta, content_type="text/json")
 
+def rss_comentarios(request):
+    plantilla = get_template('rss/canal_comentarios.rss')
+    coments = Comentarios.objects.all()
+    c = RequestContext(request, {'coments': coments})
+    respuesta = plantilla.render(c)
+    return HttpResponse(respuesta, content_type="text/rss+xml")
+
 @csrf_exempt
 def loginUser(request):
     if request.method == "POST":
