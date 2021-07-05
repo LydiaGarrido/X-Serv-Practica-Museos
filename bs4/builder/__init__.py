@@ -1,3 +1,4 @@
+from . import _htmlparser
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -317,7 +318,6 @@ class ParserRejectedMarkup(Exception):
 # builder registrations will take precedence. In general, we want lxml
 # to take precedence over html5lib, because it's faster. And we only
 # want to use HTMLParser as a last result.
-from . import _htmlparser
 register_treebuilders_from(_htmlparser)
 try:
     from . import _html5lib

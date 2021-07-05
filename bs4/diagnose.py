@@ -1,3 +1,10 @@
+import sys
+import traceback
+import time
+import tempfile
+import random
+import pstats
+import os
 """Diagnostic functions, mainly for use when doing tech support."""
 
 # Use of this source code is governed by a BSD-style license that can be
@@ -11,14 +18,6 @@ import bs4
 from bs4 import BeautifulSoup, __version__
 from bs4.builder import builder_registry
 
-import os
-import pstats
-import random
-import tempfile
-import time
-import traceback
-import sys
-import cProfile
 
 def diagnose(data):
     """Diagnostic suite for isolating common problems."""
@@ -40,7 +39,7 @@ def diagnose(data):
         basic_parsers.append(["lxml", "xml"])
         try:
             from lxml import etree
-            print("Found lxml version %s" % ".".join(map(str,etree.LXML_VERSION)))
+            print("Found lxml version %s" % ".".join(map(str, etree.LXML_VERSION)))
         except ImportError as e:
             print (
                 "lxml is not installed or couldn't be imported.")
@@ -149,20 +148,20 @@ def rword(length=5):
 
 def rsentence(length=4):
     "Generate a random sentence-like string."
-    return " ".join(rword(random.randint(4,9)) for i in range(length))
-        
+    return " ".join(rword(random.randint(4, 9)) for i in range(length))
+
 def rdoc(num_elements=1000):
     """Randomly generate an invalid HTML document."""
     tag_names = ['p', 'div', 'span', 'i', 'b', 'script', 'table']
     elements = []
     for i in range(num_elements):
-        choice = random.randint(0,3)
+        choice = random.randint(0, 3)
         if choice == 0:
             # New tag.
             tag_name = random.choice(tag_names)
             elements.append("<%s>" % tag_name)
         elif choice == 1:
-            elements.append(rsentence(random.randint(1,4)))
+            elements.append(rsentence(random.randint(1, 4)))
         elif choice == 2:
             # Close a tag.
             tag_name = random.choice(tag_names)
@@ -174,7 +173,7 @@ def benchmark_parsers(num_elements=100000):
     print("Comparative parser benchmark on Beautiful Soup %s" % __version__)
     data = rdoc(num_elements)
     print("Generated a large invalid HTML document (%d bytes)." % len(data))
-    
+
     for parser in ["lxml", ["lxml", "html"], "html5lib", "html.parser"]:
         success = False
         try:
@@ -208,7 +207,7 @@ def profile(num_elements=100000, parser="lxml"):
 
     data = rdoc(num_elements)
     vars = dict(bs4=bs4, data=data, parser=parser)
-    cProfile.runctx('bs4.BeautifulSoup(data, parser)' , vars, vars, filename)
+    cProfile.runctx('bs4.BeautifulSoup(data, parser)', vars, vars, filename)
 
     stats = pstats.Stats(filename)
     # stats.strip_dirs()

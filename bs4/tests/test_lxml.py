@@ -1,6 +1,7 @@
+from bs4.testing import skipIf
+from bs4.element import Comment, Doctype, SoupStrainer
 """Tests to ensure that the lxml tree builder generates good trees."""
 
-import re
 import warnings
 
 try:
@@ -14,14 +15,9 @@ except ImportError as e:
 if LXML_PRESENT:
     from bs4.builder import LXMLTreeBuilder, LXMLTreeBuilderForXML
 
-from bs4 import (
     BeautifulSoup,
     BeautifulStoneSoup,
     )
-from bs4.element import Comment, Doctype, SoupStrainer
-from bs4.testing import skipIf
-from bs4.tests import test_htmlparser
-from bs4.testing import (
     HTMLTreeBuilderSmokeTest,
     XMLTreeBuilderSmokeTest,
     SoupTest,
@@ -50,7 +46,7 @@ class LXMLTreeBuilderSmokeTest(SoupTest, HTMLTreeBuilderSmokeTest):
     # test if an old version of lxml is installed.
 
     @skipIf(
-        not LXML_PRESENT or LXML_VERSION < (2,3,5,0),
+        not LXML_PRESENT or LXML_VERSION < (2, 3, 5, 0), 
         "Skipping doctype test for old version of lxml to avoid segfault.")
     def test_empty_doctype(self):
         soup = self.soup("<!DOCTYPE>")

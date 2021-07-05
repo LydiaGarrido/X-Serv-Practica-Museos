@@ -10,13 +10,11 @@ same markup, but all Beautiful Soup trees can be traversed with the
 methods tested here.
 """
 
-from pdb import set_trace
 import copy
 import pickle
 import re
 import warnings
 from bs4 import BeautifulSoup
-from bs4.builder import (
     builder_registry,
     HTMLParserTreeBuilder,
 )
@@ -30,7 +28,6 @@ from bs4.element import (
     SoupStrainer,
     Tag,
 )
-from bs4.testing import (
     SoupTest,
     skipIf,
 )
@@ -154,7 +151,7 @@ class TestFindAllBasicNamespaces(TreeTest):
     def test_find_by_namespaced_name(self):
         soup = self.soup('<mathml:msqrt>4</mathml:msqrt><a svg:fill="red">')
         self.assertEqual("4", soup.find("mathml:msqrt").string)
-        self.assertEqual("a", soup.find(attrs= { "svg:fill" : "red" }).name)
+        self.assertEqual("a", soup.find(attrs= {"svg:fill" : "red"}).name)
 
 
 class TestFindAllByName(TreeTest):
@@ -162,7 +159,7 @@ class TestFindAllByName(TreeTest):
 
     def setUp(self):
         super(TreeTest, self).setUp()
-        self.tree =  self.soup("""<a>First tag.</a>
+        self.tree = self.soup("""<a>First tag.</a>
                                   <b>Second tag.</b>
                                   <c>Third <a>Nested tag.</a> tag.</c>""")
 
@@ -235,7 +232,7 @@ class TestFindAllByName(TreeTest):
         self.assertEqual('1', r3.string)
         self.assertEqual('3', r4.string)
 
-        
+
 class TestFindAllByAttribute(TreeTest):
 
     def test_find_all_by_attribute_name(self):
@@ -1272,7 +1269,7 @@ class TestCDAtaListAttributes(SoupTest):
     """
     def test_single_value_becomes_list(self):
         soup = self.soup("<a class='foo'>")
-        self.assertEqual(["foo"],soup.a['class'])
+        self.assertEqual(["foo"], soup.a['class'])
 
     def test_multiple_values_becomes_list(self):
         soup = self.soup("<a class='foo bar'>")
@@ -1280,7 +1277,7 @@ class TestCDAtaListAttributes(SoupTest):
 
     def test_multiple_values_separated_by_weird_whitespace(self):
         soup = self.soup("<a class='foo\tbar\nbaz'>")
-        self.assertEqual(["foo", "bar", "baz"],soup.a['class'])
+        self.assertEqual(["foo", "bar", "baz"], soup.a['class'])
 
     def test_attributes_joined_into_string_on_output(self):
         soup = self.soup("<a class='foo\tbar'>")
@@ -1289,7 +1286,7 @@ class TestCDAtaListAttributes(SoupTest):
     def test_get_attribute_list(self):
         soup = self.soup("<a id='abc def'>")
         self.assertEqual(['abc def'], soup.a.get_attribute_list('id'))
-        
+
     def test_accept_charset(self):
         soup = self.soup('<form accept-charset="ISO-8859-1 UTF-8">')
         self.assertEqual(['ISO-8859-1', 'UTF-8'], soup.form['accept-charset'])

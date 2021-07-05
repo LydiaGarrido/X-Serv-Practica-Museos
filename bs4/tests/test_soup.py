@@ -1,13 +1,12 @@
+import warnings
 # -*- coding: utf-8 -*-
 """Tests of Beautiful Soup as a whole."""
 
-from pdb import set_trace
 import logging
 import unittest
 import sys
 import tempfile
 
-from bs4 import (
     BeautifulSoup,
     BeautifulStoneSoup,
 )
@@ -27,7 +26,6 @@ from bs4.testing import (
     SoupTest,
     skipIf,
 )
-import warnings
 
 try:
     from bs4.builder import LXMLTreeBuilder, LXMLTreeBuilderForXML
@@ -35,7 +33,7 @@ try:
 except ImportError as e:
     LXML_PRESENT = False
 
-PYTHON_3_PRE_3_2 = (sys.version_info[0] == 3 and sys.version_info < (3,2))
+PYTHON_3_PRE_3_2 = (sys.version_info[0] == 3 and sys.version_info < (3, 2))
 
 class TestConstructor(SoupTest):
 
@@ -122,7 +120,7 @@ class TestWarnings(SoupTest):
             soup = self.soup(b"http://www.crummybytes.com/")
         # Be aware this isn't the only warning that can be raised during
         # execution..
-        self.assertTrue(any("looks like a URL" in str(w.message) 
+        self.assertTrue(any("looks like a URL" in str(w.message)
             for w in warning_list))
 
     def test_url_warning_with_unicode_url(self):
@@ -130,19 +128,19 @@ class TestWarnings(SoupTest):
             # note - this url must differ from the bytes one otherwise
             # python's warnings system swallows the second warning
             soup = self.soup("http://www.crummyunicode.com/")
-        self.assertTrue(any("looks like a URL" in str(w.message) 
+        self.assertTrue(any("looks like a URL" in str(w.message)
             for w in warning_list))
 
     def test_url_warning_with_bytes_and_space(self):
         with warnings.catch_warnings(record=True) as warning_list:
             soup = self.soup(b"http://www.crummybytes.com/ is great")
-        self.assertFalse(any("looks like a URL" in str(w.message) 
+        self.assertFalse(any("looks like a URL" in str(w.message)
             for w in warning_list))
 
     def test_url_warning_with_unicode_and_space(self):
         with warnings.catch_warnings(record=True) as warning_list:
             soup = self.soup("http://www.crummyuncode.com/ is great")
-        self.assertFalse(any("looks like a URL" in str(w.message) 
+        self.assertFalse(any("looks like a URL" in str(w.message)
             for w in warning_list))
 
 

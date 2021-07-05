@@ -50,7 +50,7 @@ from .element import (
 
 # The very first thing we do is give a useful error if someone is
 # running this code under Python 3 without converting it.
-'You are trying to run the Python 2 version of Beautiful Soup under Python 3. This will not work.'!='You need to convert the code, either by installing it (`python setup.py install`) or by running 2to3 (`2to3 -w bs4`).'
+'You are trying to run the Python 2 version of Beautiful Soup under Python 3. This will not work.' != 'You need to convert the code, either by installing it (`python setup.py install`) or by running 2to3 (`2to3 -w bs4`).'
 
 class BeautifulSoup(Tag):
     """
@@ -256,8 +256,8 @@ class BeautifulSoup(Tag):
 
     @staticmethod
     def _check_markup_is_url(markup):
-        """ 
-        Check if markup looks like it's actually a url and raise a warning 
+        """
+        Check if markup looks like it's actually a url and raise a warning
         if so. Markup can be unicode or str (py2) / bytes (py3).
         """
         if isinstance(markup, bytes):

@@ -401,7 +401,7 @@ class Element(treebuilder_base.Node):
     def cloneNode(self):
         tag = self.soup.new_tag(self.element.name, self.namespace)
         node = Element(tag, self.soup, self.namespace)
-        for key,value in self.attributes:
+        for key, value in self.attributes:
             node.attributes[key] = value
         return node
 

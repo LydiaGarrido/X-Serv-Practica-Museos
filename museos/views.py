@@ -1,4 +1,5 @@
-from django.shortcuts import render
+import datetime
+import urllib
 from django.http import HttpResponse, HttpResponseRedirect
 from museos.models import Museo, Configuracion, Comentarios, Seleccion
 from django.contrib.auth.models import User
@@ -6,8 +7,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import get_template
 from django.template import RequestContext
 from bs4 import BeautifulSoup
-import urllib
-import datetime
 from django.contrib.auth import authenticate, login, logout
 
 accesibilidad = False
@@ -44,7 +43,7 @@ def pag_principal(request):
             pag_personales += "<a href='/" + usuario.username + "'>Pagina de "
             pag_personales += usuario.username + "</a><br>"
     num_museos = len(todos_museos)
-    if(num_museos==0):
+    if(num_museos == 0):
         if request.method == "GET":
             name = 'Cargar'
             value = "Cargar"
@@ -208,7 +207,7 @@ def pag_museos(request):
                         'color': color_fondo,
                         'tamano': tamano})
     elif request.method == "POST":
-        distrito = request.body.decode('utf-8').split("=")[1].replace("+"," ")
+        distrito = request.body.decode('utf-8').split("=")[1].replace("+", " ")
         if distrito == "TODOS":
             c = RequestContext(request, {'menu': menu_desplegable,
                                         'museos': todos_museos,
@@ -413,7 +412,7 @@ def about(request):
     except (User.DoesNotExist, Configuracion.DoesNotExist):
         color_fondo = "#D3D3D3"
         tamano = "13px"
-    c = RequestContext(request,{'color': color_fondo, 'tamano': tamano});
+    c = RequestContext(request, {'color': color_fondo, 'tamano': tamano});
     respuesta = plantilla.render(c)
     return HttpResponse(respuesta)
 
@@ -423,7 +422,7 @@ def xml_usuario(request, resource):
     except User.DoesNotExist:
         plantilla = get_template("Kinda_Cloudy/error.html")
         error = "El usuario no existe"
-        c = RequestContext(request,{'error': error})
+        c = RequestContext(request, {'error': error})
         respuesta = plantilla.render(c)
         return HttpResponse(respuesta)
     plantilla = get_template('xml/canal_usuario.xml')
@@ -453,7 +452,7 @@ def json_usuario(request, resource):
     except User.DoesNotExist:
         plantilla = get_template("Kinda_Cloudy/error.html")
         error = "El usuario no existe"
-        c = RequestContext(request,{'error': error})
+        c = RequestContext(request, {'error': error})
         respuesta = plantilla.render(c)
         return HttpResponse(respuesta)
     plantilla = get_template('json/canal_usuario.json')
