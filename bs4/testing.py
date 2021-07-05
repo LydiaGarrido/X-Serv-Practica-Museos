@@ -6,9 +6,7 @@ __license__ = "MIT"
 
 import pickle
 import copy
-import functools
 import unittest
-from unittest import TestCase
 from bs4 import BeautifulSoup
 from bs4.element import (
     CharsetMetaAttributeValue,
@@ -80,7 +78,7 @@ class HTMLTreeBuilderSmokeTest(object):
             soup = self.soup("")
             new_tag = soup.new_tag(name)
             self.assertEqual(True, new_tag.is_empty_element)
-    
+
     def test_pickle_and_unpickle_identity(self):
         # Pickling a tree, then unpickling it, yields a tree identical
         # to the original.
@@ -348,7 +346,7 @@ Hello, world!
         """
         self.assertSoupEquals('<br/><br/><br/>', "<br/><br/><br/>")
         self.assertSoupEquals('<br /><br /><br />', "<br/><br/><br/>")
-        
+
     def test_head_tag_between_head_and_body(self):
         "Prevent recurrence of a bug in the html5lib treebuilder."
         content = """<html><head></head>
@@ -706,14 +704,14 @@ class XMLTreeBuilderSmokeTest(object):
         # But two of them are ns1:tag and one of them is ns2:tag.
         self.assertEqual(2, len(soup.find_all('ns1:tag')))
         self.assertEqual(1, len(soup.find_all('ns2:tag')))
-        
+
         self.assertEqual(1, len(soup.find_all('ns2:tag', key='value')))
         self.assertEqual(3, len(soup.find_all(['ns1:tag', 'ns2:tag'])))
-        
+
     def test_copy_tag_preserves_namespace(self):
         xml = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:w="http://example.com/ns0"/>"""
-    
+
         soup = self.soup(xml)
         tag = soup.document
         duplicate = copy.copy(tag)

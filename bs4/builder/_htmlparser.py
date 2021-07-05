@@ -1,3 +1,6 @@
+from bs4.builder import (
+from bs4.dammit import EntitySubstitution, UnicodeDammit
+from bs4.element import (
 """Use the HTMLParser library to parse HTML files that aren't too bad."""
 
 # Use of this source code is governed by a BSD-style license that can be
@@ -33,16 +36,13 @@ CONSTRUCTOR_STRICT_IS_DEPRECATED = major == 3 and minor == 3
 CONSTRUCTOR_TAKES_CONVERT_CHARREFS = major == 3 and minor >= 4
 
 
-from bs4.element import (
     CData,
     Comment,
     Declaration,
     Doctype,
     ProcessingInstruction,
     )
-from bs4.dammit import EntitySubstitution, UnicodeDammit
 
-from bs4.builder import (
     HTML,
     HTMLTreeBuilder,
     STRICT,
@@ -64,7 +64,7 @@ class BeautifulSoupHTMLParser(HTMLParser):
         # order. It's a list of closing tags we've already handled and
         # will ignore, assuming they ever show up.
         self.already_closed_empty_element = []
-    
+
     def handle_startendtag(self, name, attrs):
         # This is only called when the markup looks like
         # <tag/>.
@@ -75,7 +75,7 @@ class BeautifulSoupHTMLParser(HTMLParser):
         # handle_endtag ourselves.
         tag = self.handle_starttag(name, attrs, handle_empty_element=False)
         self.handle_endtag(name)
-        
+
     def handle_starttag(self, name, attrs, handle_empty_element=True):
         # XXX namespace
         attr_dict = {}
@@ -103,7 +103,7 @@ class BeautifulSoupHTMLParser(HTMLParser):
             # But we might encounter an explicit closing tag for this tag
             # later on. If so, we want to ignore it.
             self.already_closed_empty_element.append(name)
-            
+
     def handle_endtag(self, name, check_already_closed=True):
         #print "END", name
         if check_already_closed and name in self.already_closed_empty_element:
